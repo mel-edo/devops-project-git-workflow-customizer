@@ -1,7 +1,7 @@
 # Seryn
 
 **Seryn** is a DevOps-focused CLI tool that standardizes Git workflows across repositories based on team structure and organizational rules.  
-It enables developers and platform teams to quickly initialize, enforce, and upgrade Git repositories to predefined workflows such as Gitflow or Trunk-Based Development.
+It enables developers and platform teams to quickly initialize, enforce, and upgrade Git repositories to canonical Git collaboration workflows such as Centralized, Feature Branch, Gitflow, and Forking workflows.
 
 ---
 
@@ -23,7 +23,9 @@ It enables developers and platform teams to quickly initialize, enforce, and upg
 In many teams, Git workflows are applied inconsistently across repositories.  
 Setting up branches, repository rules, and CI pipelines manually for every new project is error-prone and time-consuming.
 
-There is a need for a repeatable, automated, and configurable tool that can apply standardized Git workflows reliably across single or multiple repositories.
+There is a need for a repeatable, automated, and configurable tool that can apply standardized
+Git collaboration workflows reliably across single or multiple repositories, while respecting
+real-world constraints of hosting platforms such as GitHub.
 
 ---
 
@@ -39,10 +41,15 @@ There is a need for a repeatable, automated, and configurable tool that can appl
 
 ### Key Features
 
-- CLI-based Git workflow enforcement
-- Supports Gitflow and Trunk-Based workflows
-- Automatic generation of README, `.gitignore`, and CI configuration
-- Batch mode using Go concurrency
+- CLI-based Git workflow standardization
+- Supports four canonical Git workflows:
+  - Centralized workflow
+  - Feature Branch workflow
+  - Gitflow workflow
+  - Forking workflow (documentation and policy support)
+- Automatic generation of README, `.gitignore`, CONTRIBUTING.md, and CI configuration
+- Workflow-specific branch creation and enforcement rules
+- Batch mode using Go concurrency for multi-repository setup
 - Dockerized execution for portability
 - Cloud-backed template storage (S3 simulation)
 - Webhook notifications on completion
@@ -156,12 +163,42 @@ Seryn can be configured using a YAML file:
 
 ```yaml
 default_branch: main
-workflow: gitflow
+workflow: gitflow   # centralized | feature | gitflow | forking
 require_reviews: true
+
 repositories:
   - /repo/project-a
   - /repo/project-b
 ```
+
+Seryn enforces workflows differently based on their nature.
+Centralized, Feature Branch, and Gitflow workflows are fully enforced at the repository level.
+The Forking workflow is supported through repository policies and documentation scaffolding,
+as it depends on platform-level permissions outside the scope of a local Git CLI.
+
+### Supported Workflows
+
+#### 1. Centralized Workflow
+- Single shared repository
+- Developers push directly to `main`
+- CI runs on every push to `main`
+
+#### 2. Feature Branch Workflow
+- `main` is protected
+- Feature branches (`feature/*`, `fix/*`)
+- Pull requests required for merging
+- CI triggered on pull requests
+
+#### 3. Gitflow Workflow
+- Long-lived `main` and `develop` branches
+- Feature branches merged into `develop`
+- CI triggered on pull requests to `develop`
+
+#### 4. Forking Workflow
+- Intended for open-source or external contributors
+- Direct pushes to `main` are restricted
+- CONTRIBUTING.md documents fork-based contribution flow
+- Enforcement is partial due to reliance on hosting-platform permissions
 
 ### CI/CD Pipeline
 
