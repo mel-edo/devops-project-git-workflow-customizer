@@ -7,7 +7,6 @@ import (
 	"seryn/src/internal/engine"
 )
 
-// TODO:
 // Parse CLI flags (--workflow, --repo etc.)
 // validate user input
 // invoke engine to apply workflow
@@ -15,6 +14,7 @@ import (
 
 func main() {
 	workflow := flag.String("workflow", "", "Git workflow to apply")
+	repo := flag.String("repo", ".", "Path to the Git repository")
 	flag.Parse()
 
 	if *workflow == "" {
@@ -22,7 +22,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := engine.ApplyWorkflow(*workflow)
+	err := engine.ApplyWorkflow(*repo, *workflow)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)

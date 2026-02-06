@@ -2,7 +2,6 @@ package workflow
 
 import "fmt"
 
-// TODO:
 // define supported workflows (centralized, feature, gitflow, forking)
 // define WorkflowSpec struct (branches, CI triggers, contribution rules)
 // implement Resolve(workflowName) -> WorkflowSpec
