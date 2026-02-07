@@ -1,0 +1,38 @@
+name: CI
+
+on:
+   push:
+      branches: ["main"]
+   pull_request:
+
+jobs:
+   build:
+      runs-on: ubuntu-latest
+
+      steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+         go-version: "1.25"
+
+      - name: Verify Go modules
+        run: go mod tidy && git diff --exit-code
+      
+      - name: Run go tests
+        run: go test ./...
+      
+      - name: Builds Docker image
+        run: |
+          docker build \
+            -t seryn:ci \
+            -f infrastructure/docker/Dockerfile .
+      
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+         image-ref: 'seryn:ci'
+         severity: CRITICAL,HIGH
+         exit-code: '1'
