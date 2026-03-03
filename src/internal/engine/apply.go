@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"fmt"
 	"seryn/src/internal/generator"
 	"seryn/src/internal/gitops"
+	"seryn/src/internal/logger"
 	"seryn/src/internal/workflow"
 )
 
@@ -15,8 +15,9 @@ import (
 // log summary of actions performed
 
 func ApplyWorkflow(repoPath string, workflowName string) error {
-	err := gitops.EnsureRepo(repoPath)
-	if err != nil {
+	logger.Info("Initializing repository at: " + repoPath)
+
+	if err := gitops.EnsureRepo(repoPath); err != nil {
 		return err
 	}
 
@@ -25,18 +26,15 @@ func ApplyWorkflow(repoPath string, workflowName string) error {
 		return err
 	}
 
+	logger.Info("Resolving workflow: " + workflowName)
+
 	unexpected, err := gitops.EnsureBranches(repoPath, spec.RequiredBranches)
 	if err != nil {
 		return err
 	}
 
 	for _, b := range unexpected {
-		fmt.Printf(
-			"Warning: unexpected branch '%s' exists; workflow '%s' expects %v\n",
-			b,
-			spec.Name,
-			spec.RequiredBranches,
-		)
+		logger.Warning("Unexpected branch '" + b + "' exists; not part of workflow '" + spec.Name + "'")
 	}
 
 	if err := generator.GenerateFiles(
@@ -47,21 +45,18 @@ func ApplyWorkflow(repoPath string, workflowName string) error {
 		return err
 	}
 
+	if err := generator.GenerateCI(repoPath, spec.CITrigger); err != nil {
+		return err
+	}
+
 	filesGenerated := []string{
 		"README.md",
 		".gitignore",
 		"CONTRIBUTING.md",
+		".github/workflows/ci.yml",
 	}
 
-	fmt.Println("✔ Repository ready")
-	fmt.Printf("✔ Workflow applied: %s\n", spec.Name)
-	fmt.Printf("✔ Branches ensured: %v\n", spec.RequiredBranches)
-
-	if len(unexpected) > 0 {
-		fmt.Printf("Extra branches detected: %v\n", unexpected)
-	}
-
-	fmt.Printf("✔ Files handled: %v\n", filesGenerated)
+	logger.Summary(spec.Name, spec.RequiredBranches, filesGenerated, unexpected)
 
 	return nil
 }
