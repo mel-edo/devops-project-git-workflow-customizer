@@ -1,0 +1,8 @@
+workflow: gitflow
+default_branch: main
+require_reviews: true
+webhook_url: ""
+
+repositories:
+  - /repo/project-a
+  - /repo/project-b
