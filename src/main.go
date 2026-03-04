@@ -26,13 +26,16 @@ func main() {
 			os.Exit(1)
 		}
 
-		for _, r := range cfg.Repositories {
-			fmt.Printf("Applying workflow '%s' to %s\n", cfg.Workflow, r)
-			if err := engine.ApplyWorkflow(r, cfg.Workflow); err != nil {
-				fmt.Printf("Error processing %s: %v\n", r, err)
+		if len(cfg.Repositories) == 1 {
+			if err := engine.ApplyWorkflow(cfg.Repositories[0], cfg.Workflow); err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
 			}
+			return
 		}
 
+		results := engine.ApplyWorkflowBatch(cfg.Repositories, cfg.Workflow)
+		engine.PrintBatchSummary(results)
 		return
 	}
 
