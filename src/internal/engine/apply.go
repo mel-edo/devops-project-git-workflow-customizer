@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"seryn/monitoring"
 	"seryn/src/internal/generator"
 	"seryn/src/internal/gitops"
 	"seryn/src/internal/logger"
@@ -15,14 +16,24 @@ import (
 // log summary of actions performed
 
 func ApplyWorkflow(repoPath string, workflowName string) error {
+	return applyWorkflow(repoPath, workflowName, "")
+}
+
+func ApplyWorkflowWithAlert(repoPath string, workflowName string, webhookURL string) error {
+	return applyWorkflow(repoPath, workflowName, webhookURL)
+}
+
+func applyWorkflow(repoPath string, workflowName string, webhookURL string) error {
 	logger.Info("Initializing repository at: " + repoPath)
 
 	if err := gitops.EnsureRepo(repoPath); err != nil {
+		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}
 
 	spec, err := workflow.ResolveWorkflow(workflowName)
 	if err != nil {
+		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}
 
@@ -30,6 +41,7 @@ func ApplyWorkflow(repoPath string, workflowName string) error {
 
 	unexpected, err := gitops.EnsureBranches(repoPath, spec.RequiredBranches)
 	if err != nil {
+		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}
 
@@ -42,10 +54,12 @@ func ApplyWorkflow(repoPath string, workflowName string) error {
 		spec.Name,
 		spec.ContributionGuidelines,
 	); err != nil {
+		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}
 
 	if err := generator.GenerateCI(repoPath, spec.CITrigger); err != nil {
+		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}
 
@@ -57,6 +71,8 @@ func ApplyWorkflow(repoPath string, workflowName string) error {
 	}
 
 	logger.Summary(spec.Name, spec.RequiredBranches, filesGenerated, unexpected)
+
+	monitoring.SendAlert(webhookURL, repoPath, workflowName, "success")
 
 	return nil
 }

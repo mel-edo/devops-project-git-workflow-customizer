@@ -27,7 +27,7 @@ func main() {
 		}
 
 		if len(cfg.Repositories) == 1 {
-			if err := engine.ApplyWorkflow(cfg.Repositories[0], cfg.Workflow); err != nil {
+			if err := engine.ApplyWorkflowWithAlert(cfg.Repositories[0], cfg.Workflow, cfg.WebhookURL); err != nil {
 				fmt.Println("Error:", err)
 				os.Exit(1)
 			}
@@ -40,7 +40,7 @@ func main() {
 	}
 
 	if *workflow == "" {
-		fmt.Println("Error: --workflow flag is required")
+		fmt.Println("Error: --workflow flag is required (or use --config)")
 		os.Exit(1)
 	}
 
