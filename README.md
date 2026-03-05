@@ -106,8 +106,8 @@ go run src/main.go --workflow gitflow --repo /path/to/project
 #### Running with Docker
 
 ```bash
-docker build -t seryn .
-docker run -v $(pwd):/repo seryn apply --workflow trunk
+make build
+make run ARGS="--workflow gitflow"
 ```
 
 ### Project Structure
@@ -118,6 +118,7 @@ devops-project-git-workflow-customizer/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
+├── Makefile
 │
 ├── src/
 │   ├── main.go
@@ -125,36 +126,39 @@ devops-project-git-workflow-customizer/
 │   ├── config/
 │   │   └── config.yaml
 │   └── internal/
+│       ├── engine/
+│       │   ├── apply.go
+│       │   └── batch.go
 │       ├── gitops/
+│       │   ├── repo.go
+│       │   └── branches.go
 │       ├── generator/
+│       │   ├── files.go
+│       │   ├── ci.go
+│       │   └── generator_test.go
+│       ├── workflow/
+│       │   ├── resolver.go
+│       │   └── workflow_test.go
 │       ├── monitoring/
-│       └── utils/
+│       │   └── alert.go
+│       ├── config/
+│       │   └── loader.go
+│       └── logger/
+│           └── logger.go
 │
 ├── infrastructure/
 │   ├── docker/
 │   │   └── Dockerfile
-│   │   └── docker-compose.yml
 │   └── terraform/
 │       └── main.tf
 │
-├── pipelines/
-│   └── .github/workflows/
-│       └── ci-cd.yml
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 │
-├── tests/
-│   ├── unit/
-│   └── test-data/
-│
-├── monitoring/
-│   └── alerts/
-│       └── alert-config.json
-│
-├── docs/
-│   ├── project-plan.md
-│   ├── user-guide.md
-│   └── design-document.md
-│
-└── deliverables/
+└── docs/
+    ├── user-guide.md
+    └── design-document.md
 ```
 
 ### Configuration
@@ -165,6 +169,7 @@ Seryn can be configured using a YAML file:
 default_branch: main
 workflow: gitflow   # centralized | feature | gitflow | forking
 require_reviews: true
+webhook_url: "https://discord.com/api/webhooks/your/webhook"
 
 repositories:
   - /repo/project-a
@@ -212,7 +217,7 @@ The GitHub Actions pipeline performs:
 Pipeline definition:
 
 ```bash
-pipelines/.github/workflows/ci-cd.yml
+.github/workflows/ci.yml
 ```
 
 ### Testing
@@ -222,7 +227,7 @@ pipelines/.github/workflows/ci-cd.yml
 - Tests run automatically in CI
 
 ```bash
-go test ./...
+cd src && go test ./...
 ```
 
 ### Monitoring & Alerts
@@ -233,11 +238,13 @@ After successful workflow application, Seryn sends a webhook notification contai
 - Applied workflow
 - Status (success/failure)
 
-Webhook configuration:
+Webhook configuration is done via the config YAML file:
 
-```bash
-monitoring/alerts/alert-config.json
+```yaml
+webhook_url: "https://discord.com/api/webhooks/your/webhook"
 ```
+
+Compatible with Slack and Discord webhooks. Leave empty to disable.
 
 ### Docker & Infrastructure
 
