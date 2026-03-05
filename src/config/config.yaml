@@ -1,7 +1,7 @@
 workflow: gitflow
 default_branch: main
 require_reviews: true
-webhook_url: ""
+webhook_url: "https://discord.com/api/webhooks/1479049790296821872/jcWp5Sdu7X4rrYLz6wlhhcNvbBExxhpyb6yAgGZXk83tpdR7EUeArQYElAiy9CpGo_iX"
 
 repositories:
   - /repo/project-a
