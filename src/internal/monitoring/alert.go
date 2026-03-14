@@ -1,0 +1,54 @@
+package monitoring
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type AlertPayload struct {
+	Content string `json:"content"`
+}
+
+func SendAlert(webhookURL string, repo string, workflowName string, status string) error {
+	if webhookURL == "" {
+		return nil
+	}
+
+	emoji := "✅"
+	if status == "failure" {
+		emoji = "❌"
+	}
+
+	message := fmt.Sprintf(
+		"%s **Seryn Alert**\n**Repository:** %s\n**Workflow:** %s\n**Status:** %s\n**Time:** %s",
+		emoji,
+		repo,
+		workflowName,
+		status,
+		time.Now().UTC().Format(time.RFC3339),
+	)
+
+	payload := AlertPayload{Content: message}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal alert payload: %w", err)
+	}
+
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	resp, err := client.Post(webhookURL, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return fmt.Errorf("failed to send alert: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("alert webhook returned non-2xx status: %d", resp.StatusCode)
+	}
+
+	return nil
+}
