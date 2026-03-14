@@ -14,7 +14,7 @@ run: build
 			-e GIT_AUTHOR_EMAIL="$$(git config --global user.email)" \
 			-e GIT_COMMITTER_NAME="$$(git config --global user.name)" \
 			-e GIT_COMMITTER_EMAIL="$$(git config --global user.email)" \
-			-v "$(TEST_DIR)":/repo \
+			-v "$$(realpath $(TEST_DIR))":/repo \
 			$(IMAGE_NAME) --repo /repo $(ARGS)
 
 clean:

@@ -16,7 +16,7 @@ func EnsureRepo(path string) error {
 	gitDir := filepath.Join(path, ".git")
 
 	if _, err := os.Stat(gitDir); os.IsNotExist(err) {
-		initCmd := exec.Command("git", "init")
+		initCmd := exec.Command("git", "init", "-b", "main")
 		initCmd.Dir = path
 
 		out, err := initCmd.CombinedOutput()
@@ -40,13 +40,11 @@ func ensureInitialCommit(path string) error {
 		return nil
 	}
 
-	readmePath := filepath.Join(path, "README.md")
-
-	if _, err := os.Stat(readmePath); os.IsNotExist(err) {
-		content := []byte("# Initial Commit\n")
-		if err := os.WriteFile(readmePath, content, 0644); err != nil {
-			return err
-		}
+	// Use a hidden placeholder instead of README.md so GenerateFiles
+	// can create README.md cleanly
+	placeholderPath := filepath.Join(path, ".seryn-init")
+	if err := os.WriteFile(placeholderPath, []byte(""), 0644); err != nil {
+		return err
 	}
 
 	addCmd := exec.Command("git", "add", ".")
@@ -68,6 +66,11 @@ func ensureInitialCommit(path string) error {
 	out, err = commitCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("git commit failed: %s", strings.TrimSpace(string(out)))
+	}
+
+	// Remove placeholder now that the initial commit exists
+	if err := os.Remove(placeholderPath); err != nil {
+		return fmt.Errorf("failed to remove placeholder: %w", err)
 	}
 
 	return nil

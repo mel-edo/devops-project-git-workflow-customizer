@@ -12,7 +12,7 @@ type BatchResult struct {
 	Error   error
 }
 
-func ApplyWorkflowBatch(repos []string, workflowName string) []BatchResult {
+func ApplyWorkflowBatch(repos []string, workflowName string, webhookURL string) []BatchResult {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 
@@ -24,7 +24,7 @@ func ApplyWorkflowBatch(repos []string, workflowName string) []BatchResult {
 		go func(r string) {
 			defer wg.Done()
 
-			err := ApplyWorkflow(r, workflowName)
+			err := applyWorkflow(r, workflowName, webhookURL)
 
 			mu.Lock()
 			defer mu.Unlock()

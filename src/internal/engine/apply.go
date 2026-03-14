@@ -1,10 +1,10 @@
 package engine
 
 import (
-	"seryn/monitoring"
 	"seryn/src/internal/generator"
 	"seryn/src/internal/gitops"
 	"seryn/src/internal/logger"
+	"seryn/src/internal/monitoring"
 	"seryn/src/internal/workflow"
 )
 
@@ -24,15 +24,16 @@ func ApplyWorkflowWithAlert(repoPath string, workflowName string, webhookURL str
 }
 
 func applyWorkflow(repoPath string, workflowName string, webhookURL string) error {
-	logger.Info("Initializing repository at: " + repoPath)
-
-	if err := gitops.EnsureRepo(repoPath); err != nil {
+	// validate workflow first before touching filesystem
+	spec, err := workflow.ResolveWorkflow(workflowName)
+	if err != nil {
 		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}
 
-	spec, err := workflow.ResolveWorkflow(workflowName)
-	if err != nil {
+	logger.Info("Initializing repository at: " + repoPath)
+
+	if err := gitops.EnsureRepo(repoPath); err != nil {
 		monitoring.SendAlert(webhookURL, repoPath, workflowName, "failure")
 		return err
 	}

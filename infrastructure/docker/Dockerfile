@@ -5,7 +5,7 @@ ENV CGO_ENABLED=0
 RUN apk add --no-cache git
 
 WORKDIR /app
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 COPY src ./src
 

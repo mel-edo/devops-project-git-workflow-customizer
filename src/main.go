@@ -17,6 +17,7 @@ func main() {
 	workflow := flag.String("workflow", "", "Git workflow to apply")
 	repo := flag.String("repo", ".", "Path to the Git repository")
 	configPath := flag.String("config", "", "Path to a YAML config file")
+	webhookURL := flag.String("webhook", "", "Webhook URL for notifications")
 	flag.Parse()
 
 	if *configPath != "" {
@@ -34,7 +35,7 @@ func main() {
 			return
 		}
 
-		results := engine.ApplyWorkflowBatch(cfg.Repositories, cfg.Workflow)
+		results := engine.ApplyWorkflowBatch(cfg.Repositories, cfg.Workflow, cfg.WebhookURL)
 		engine.PrintBatchSummary(results)
 		return
 	}
@@ -44,7 +45,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := engine.ApplyWorkflow(*repo, *workflow)
+	// try to load webhook URL from default config if present
+	url := *webhookURL
+	if url == "" {
+		if defaultCfg, err := config.LoadDefaultConfig(); err == nil && defaultCfg != nil {
+			url = defaultCfg.WebhookURL
+		}
+	}
+
+	err := engine.ApplyWorkflowWithAlert(*repo, *workflow, url)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
