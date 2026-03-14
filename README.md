@@ -7,11 +7,16 @@ It enables developers and platform teams to quickly initialize, enforce, and upg
 
 ## Student Details
 
-**Student Name:** 
-**Registration Number:** 
+**Student Name:** Saurabh P
+
+**Registration Number:** 23FE10CSE00264
+
 **Course:** CSE3253 – DevOps [PE6]  
+
 **Semester:** VI (2025–2026)  
+
 **Project Type:** Git & DevOps Automation  
+
 **Difficulty Level:** Intermediate  
 
 ---
@@ -168,7 +173,6 @@ Seryn can be configured using a YAML file:
 ```yaml
 default_branch: main
 workflow: gitflow   # centralized | feature | gitflow | forking
-require_reviews: true
 webhook_url: "https://discord.com/api/webhooks/your/webhook"
 
 repositories:
@@ -223,7 +227,6 @@ Pipeline definition:
 ### Testing
 
 - Unit tests verify file generation and workflow application
-- Test data stored in tests/test-data/
 - Tests run automatically in CI
 
 ```bash
@@ -258,37 +261,12 @@ Compatible with Slack and Discord webhooks. Leave empty to disable.
 - Provisions an S3 bucket to store workflow templates
 - Simulates enterprise policy storage
 
-### Development Workflow
+## Contributing
 
-#### Git Branching Strategy
+Suggestions, fixes and improvments are welcome. Feel free to open an issue or a PR.
 
-```bash
-main
-└── develop
-    ├── feature/*
-    ├── hotfix/*
-```
+---
 
-### Commit Convention
+## License
 
-- feat: New feature
-- fix: Bug fix
-- docs: Documentation
-- refactor: Code refactoring
-- chore: Maintenance tasks
-
-### Security
-
-- No hard-coded secrets
-- Environment-based configuration
-- Container image scanning with Trivy
-- Principle of least privilege (Terraform)
-
-### Demo
-
-A demo video demonstrating:
-
-- Repository initialization
-- Workflow application
-- Batch processing
-- CI/CD pipeline execution
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

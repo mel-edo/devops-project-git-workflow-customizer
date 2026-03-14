@@ -55,8 +55,9 @@ Parses and validates YAML configuration files. Enables config-driven and
 batch execution modes.
 
 ### `internal/monitoring`
-Sends webhook POST notifications on workflow completion. Failures are
-non-fatal — a failed webhook does not abort execution.
+Sends webhook POST notifications on workflow completion.
+Webhook URL can be provided via config file or the --webhook CLI flag.
+If both are absent, alerts are silently skipped.
 
 ### `internal/logger`
 Provides structured, consistent terminal output across all packages.

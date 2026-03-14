@@ -31,7 +31,7 @@ make run ARGS="--workflow gitflow --repo /repo"
 
 Apply a workflow to a single repository:
 ```bash
-seryn --workflow  --repo 
+seryn --workflow gitflow --repo /path/to/repo --webhook "https://discord.com/api/webhooks/your/url"
 ```
 
 Supported workflows:
@@ -54,7 +54,6 @@ Example config file:
 ```yaml
 workflow: gitflow
 default_branch: main
-require_reviews: true
 webhook_url: "https://discord.com/api/webhooks/your/webhook"
 
 repositories:
@@ -73,7 +72,7 @@ using goroutines and prints a batch summary on completion.
 For every repository, Seryn creates the following files if they do not exist:
 
 - `README.md` — identifies the applied workflow
-- `.gitignore` — sensible defaults for Go projects
+- `.gitignore` — sensible defaults for common build artifacts and logs
 - `CONTRIBUTING.md` — workflow-specific contribution guidelines
 - `.github/workflows/ci.yml` — GitHub Actions CI pipeline matching the workflow trigger
 
