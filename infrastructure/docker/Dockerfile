@@ -12,10 +12,10 @@ COPY src ./src
 RUN go build -ldflags="-s -w" -o seryn ./src
 
 # Runtime
-FROM alpine:3.23
+FROM alpine:latest
 
 RUN addgroup -S seryn && adduser -S seryn -G seryn
-RUN apk add --no-cache git
+RUN apk add --no-cache git && apk upgrade --no-cache
 WORKDIR /app
 COPY --from=builder /app/seryn /usr/local/bin/seryn
 
