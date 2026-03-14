@@ -3,16 +3,28 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Workflow       string   `yaml:"workflow"`
-	DefaultBranch  string   `yaml:"default_branch"`
-	RequireReviews bool     `yaml:"require_reviews"`
-	WebhookURL     string   `yaml:"webhook_url"`
-	Repositories   []string `yaml:"repositories"`
+	Workflow      string   `yaml:"workflow"`
+	DefaultBranch string   `yaml:"default_branch"`
+	WebhookURL    string   `yaml:"webhook_url"`
+	Repositories  []string `yaml:"repositories"`
+}
+
+func expandPath(path string) string {
+	if strings.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return path
+		}
+		return filepath.Join(home, path[2:])
+	}
+	return path
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -26,11 +38,32 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
 
+	// expand ~ in all repo paths
+	for i, r := range cfg.Repositories {
+		cfg.Repositories[i] = expandPath(r)
+	}
+
 	if err := validate(&cfg); err != nil {
 		return nil, err
 	}
 
 	return &cfg, nil
+}
+
+func LoadDefaultConfig() (*Config, error) {
+	candidates := []string{
+		"seryn.yaml",
+		"seryn.yml",
+		".seryn.yaml",
+	}
+
+	for _, name := range candidates {
+		if _, err := os.Stat(name); err == nil {
+			return LoadConfig(name)
+		}
+	}
+
+	return nil, nil // no default config found, not an error
 }
 
 func validate(cfg *Config) error {
